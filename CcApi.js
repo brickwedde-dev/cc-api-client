@@ -25,7 +25,7 @@ class CcApi extends HTMLElement {
               if (!response.ok) {
                 throw new Error('Network response was not ok');
               }
-              response.json()
+              return response.json();
             });
           }, receiver);
         }
