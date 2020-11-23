@@ -1,4 +1,5 @@
 "use strict";
+
 if (typeof Proxy == "undefined") {
     throw new Error("This browser doesn't support Proxy");
 }
@@ -14,12 +15,19 @@ class CcApi extends HTMLElement {
       get(target, name, receiver) {
         if (!Reflect.has(target, name)) {
           Reflect.set(target, name, (...params) => {
+            var headers = {
+              'Content-Type': 'application/json'
+            };
+            if (that.authorizationBearer) {
+              headers["Authorization"] = "Bearer " + that.authorizationBearer;
+            }
+            if (that.authorizationBasic) {
+              headers["Authorization"] = "Basic " + that.authorizationBasic;
+            }
             return fetch(that._src + "/method/" + name,  {
               method: 'POST',
               mode: 'cors',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers,
               cache: 'no-cache',
               credentials: 'same-origin',
               body: JSON.stringify(params)
