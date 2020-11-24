@@ -63,7 +63,13 @@ class CcApi extends HTMLElement {
     if (this.eventSource) {
       this.eventSource.close();
     }
-    this.eventSource = new EventSource(this._src + "/sse/connection");
+
+    var url = this._src + "/sse/connection";
+    if (this.authorizationBearer) {
+      url += "?bearer=" + this.authorizationBearer;
+    }
+
+    this.eventSource = new EventSource(url);
     this.eventSource.onmessage = (event) => {
       var x = JSON.parse(event.data);
       if (this.callbacks[x.fnname]) {
