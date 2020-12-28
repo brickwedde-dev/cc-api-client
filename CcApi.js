@@ -35,9 +35,9 @@ class CcApi extends HTMLElement {
             .then((response) => {
               if (!response.ok) {
                 if (response.headers.has("X-Exception")) {
-                  throw new Error(response.headers.get("X-Exception"));
+                  throw response.headers.get("X-Exception");
                 } else {
-                  throw new Error('Network response was not ok');
+                  throw 'Network response was not ok';
                 }
               }
               return response.json();
