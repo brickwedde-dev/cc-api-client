@@ -34,8 +34,8 @@ class CcApi extends HTMLElement {
             })
             .then((response) => {
               if (!response.ok) {
-                if (response.headers["X-Exception"]) {
-                  throw new Error(response.headers["X-Exception"]);
+                if (response.headers.has("X-Exception")) {
+                  throw new Error(response.headers.get("X-Exception"));
                 } else {
                   throw new Error('Network response was not ok');
                 }
@@ -95,7 +95,11 @@ class CcApi extends HTMLElement {
     })
     .then((response) => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        if (response.headers.has("X-Exception")) {
+          throw new Error(response.headers.get("X-Exception"));
+        } else {
+          throw new Error('Network response was not ok');
+        }
       }
       return response.json();
     });
