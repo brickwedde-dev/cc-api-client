@@ -7,6 +7,9 @@ if (typeof Proxy == "undefined") {
 class CcApi extends HTMLElement {
   constructor() {
     super();
+
+    this.instanceObjects = {};
+
     this.callbacknames = [];
 
     var that = this;
@@ -268,6 +271,7 @@ class CcApi extends HTMLElement {
               .then((response) => {
                 if (response.headers.has("X-InstanceNo")) {
                   let __instance_no = response.headers.get("X-InstanceNo");
+                  var eventHandlers = {};
                   var instance = {
                     call : new Proxy({}, {
                       get(target, name2, receiver) {
@@ -287,7 +291,36 @@ class CcApi extends HTMLElement {
                     json : () => {
                       return that.jsonInstanceProperty(that, __instance_no);
                     },
+                    addEventHandler : (event, handler) => {
+                      if (!eventHandlers[event]) {
+                        eventHandlers[event] = [];
+                      }
+                      eventHandlers[event].push(handler);
+                    },
+                    removeEventHandler : (event, handler) => {
+                      if (eventHandlers[event]) {
+                        var index = eventHandlers[event].indexOf(handler);
+                        if (index >= 0) {
+                          eventHandlers[event].splice(index, 1);
+                        }
+                      }
+                    },
                   };
+                  that.instanceObjects[__instance_no] = instance;
+                  Object.defineProperty(instance, "__callEventHandlers", {
+                    enumerable: false,
+                    writable: false,
+                    value: (event, detail) => {
+                      if (eventHandlers[event]) {
+                        for(var h of eventHandlers[event]) {
+                          try {
+                            h({type : event, detail});
+                          } catch (e) {
+                          }
+                        }
+                      }
+                    } 
+                  });
                   resolve(instance);
                 } else if (response.headers.has("X-Exception")) {
                   throw response.headers.get("X-Exception");
@@ -326,6 +359,11 @@ class CcApi extends HTMLElement {
     this.eventSource = new EventSource(url);
     this.eventSource.onmessage = (event) => {
       var x = JSON.parse(event.data);
+      if (x.customevent > 0) {
+        if (this.instanceObjects[x.customevent]) {
+          this.instanceObjects[x.customevent].__callEventHandlers(x.event, x.detail);
+        }
+      }
       if (this.callbacks[x.fnname]) {
         this.callbacks[x.fnname].apply (null, x.params);
       }
