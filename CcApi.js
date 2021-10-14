@@ -52,7 +52,7 @@ class CcApi extends HTMLElement {
       set(target, name, receiver) {
         that.callbacknames.push(name);
         target[name] = receiver;
-        that.registerFunctions();
+//        that.registerFunctions();
         return true;
       },
     });
@@ -103,7 +103,7 @@ class CcApi extends HTMLElement {
       }
       return response.json();
     });
-}
+  }
 
   connectedCallback() {
     this._src = this.getAttribute("src") || this._src;
