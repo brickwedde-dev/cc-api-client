@@ -55,7 +55,7 @@ class CcApi extends HTMLElement {
       set(target, name, receiver) {
         that.callbacknames.push(name);
         target[name] = receiver;
-//        that.registerFunctions();
+        that.registerFunctions();
         return true;
       },
     });
