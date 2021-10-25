@@ -4,6 +4,12 @@ if (typeof Proxy == "undefined") {
     throw new Error("This browser doesn't support Proxy");
 }
 
+String.prototype.escapeXml = function escapeXml () {
+  var span = document.createElement("span");
+  span.innerText = this;
+  return span.innerHTML;
+}
+
 class CcApi extends HTMLElement {
   constructor() {
     super();
@@ -38,7 +44,7 @@ class CcApi extends HTMLElement {
             .then((response) => {
               if (!response.ok) {
                 if (response.headers.has("X-Exception")) {
-                  throw response.headers.get("X-Exception");
+                  throw response.headers.get("X-Exception").escapeXml();
                 } else {
                   throw 'Network response was not ok';
                 }
