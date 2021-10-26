@@ -4,12 +4,6 @@ if (typeof Proxy == "undefined") {
     throw new Error("This browser doesn't support Proxy");
 }
 
-String.prototype.escapeXml = function escapeXml () {
-  var span = document.createElement("span");
-  span.innerText = this;
-  return span.innerHTML;
-}
-
 class CcApi extends HTMLElement {
   constructor() {
     super();
