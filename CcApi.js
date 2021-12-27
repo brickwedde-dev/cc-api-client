@@ -8,6 +8,8 @@ class CcApi extends HTMLElement {
   constructor() {
     super();
 
+    this.ssetimeout = 0;
+
     this.instanceObjects = {};
 
     this.callbacknames = [];
@@ -55,7 +57,6 @@ class CcApi extends HTMLElement {
       set(target, name, receiver) {
         that.callbacknames.push(name);
         target[name] = receiver;
-        that.registerFunctions();
         return true;
       },
     });
@@ -357,7 +358,16 @@ class CcApi extends HTMLElement {
     }
 
     this.eventSource = new EventSource(url);
+    this.eventSource.onopen = (event) => {
+      this.registerFunctions();
+    };
+
+    this.eventSource.onerror = (event) => {
+      this.updateEventConnection();
+    };
+
     this.eventSource.onmessage = (event) => {
+      this.restartcheck();
       var x = JSON.parse(event.data);
       if (x.customevent > 0) {
         if (this.instanceObjects[x.customevent]) {
@@ -368,6 +378,20 @@ class CcApi extends HTMLElement {
         this.callbacks[x.fnname].apply (null, x.params);
       }
     };
+
+    this.restartcheck();
+  }
+
+  restartcheck() {
+    if (this.ssechecktimeout) {
+      clearTimeout(this.ssechecktimeout);
+    }
+    if (this.ssetimeout > 0) {
+      this.ssechecktimeout = setTimeout(() => {
+        console.error("SSE timeout!!!");
+        this.updateEventConnection();
+      }, this.ssetimeout);
+    }
   }
 
   registerFunctions() {
