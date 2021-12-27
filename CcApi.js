@@ -363,7 +363,9 @@ class CcApi extends HTMLElement {
     };
 
     this.eventSource.onerror = (event) => {
-      this.updateEventConnection();
+      setTimeout(() => {
+        this.updateEventConnection();
+      }, 1000);
     };
 
     this.eventSource.onmessage = (event) => {
