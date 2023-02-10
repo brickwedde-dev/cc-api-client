@@ -29,7 +29,7 @@ class CcApi extends HTMLElement {
             if (that.authorizationBasic) {
               headers["Authorization"] = "Basic " + that.authorizationBasic;
             }
-            return fetch(that._src + "/method/" + name,  {
+            return fetch(that._src + "/" + name,  {
               method: 'POST',
               mode: 'cors',
               headers,
