@@ -352,7 +352,7 @@ class CcApi extends HTMLElement {
       this.eventSource.close();
     }
 
-    var url = this._src + "/sse/connection";
+    var url = this._src + "/core/connection";
     if (this.authorizationBearer) {
       url += "?bearer=" + this.authorizationBearer;
     }
