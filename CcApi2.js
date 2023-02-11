@@ -8,6 +8,8 @@ class CcApi extends HTMLElement {
   constructor() {
     super();
 
+    this.opencount = 0;
+
     this.ssetimeout = 0;
 
     this.instanceObjects = {};
@@ -16,40 +18,48 @@ class CcApi extends HTMLElement {
 
     var that = this;
 
-    this.methods = new Proxy({}, {
-      get(target, name, receiver) {
-        if (!Reflect.has(target, name)) {
-          Reflect.set(target, name, (...params) => {
-            var headers = {
-              'Content-Type': 'application/json'
-            };
-            if (that.authorizationBearer) {
-              headers["Authorization"] = "Bearer " + that.authorizationBearer;
-            }
-            if (that.authorizationBasic) {
-              headers["Authorization"] = "Basic " + that.authorizationBasic;
-            }
-            return fetch(that._src + "/" + name,  {
-              method: 'POST',
-              mode: 'cors',
-              headers,
-              cache: 'no-cache',
-              credentials: 'same-origin',
-              body: JSON.stringify(params)
-            })
-            .then((response) => {
-              if (!response.ok) {
-                if (response.headers.has("X-Exception")) {
-                  throw response.headers.get("X-Exception").escapeXml();
-                } else {
-                  throw 'Network response was not ok';
-                }
+    this.plugins = new Proxy({}, {
+      get(target1, name1, receiver1) {
+        if (!Reflect.has(target1, name1)) {
+          Reflect.set(target1, name1, new Proxy({}, {
+            get(target2, name2, receiver2) {
+              if (!Reflect.has(target2, name2)) {
+                Reflect.set(target2, name2, (...params) => {
+                  var headers = {
+                    'Content-Type': 'application/json'
+                  };
+                  if (that.authorizationBearer) {
+                    headers["Authorization"] = "Bearer " + that.authorizationBearer;
+                  }
+                  if (that.authorizationBasic) {
+                    headers["Authorization"] = "Basic " + that.authorizationBasic;
+                  }
+                  return fetch(that._src + "/" + name1 + "/" + name2,  {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers,
+                    cache: 'no-cache',
+                    credentials: 'same-origin',
+                    body: JSON.stringify(params)
+                  })
+                  .then((response) => {
+                    if (!response.ok) {
+                      if (response.headers.has("X-Exception")) {
+                        throw response.headers.get("X-Exception").escapeXml();
+                      } else {
+                        throw 'Network response was not ok';
+                      }
+                    }
+                    return response.json();
+                  });
+                }, receiver2);
               }
-              return response.json();
-            });
-          }, receiver);
+              return Reflect.get(target2, name2, receiver2);
+            },
+          })
+          , receiver1);
         }
-        return Reflect.get(target, name, receiver);
+        return Reflect.get(target1, name1, receiver1);
       },
     });
 
@@ -62,288 +72,9 @@ class CcApi extends HTMLElement {
     });
   }
 
-  fetchInstanceProperty(that, instance_no, name) {
-    return new Promise((resolve, reject) => {
-      var headers = {
-        'Content-Type': 'application/json'
-      };
-      if (that.authorizationBearer) {
-        headers["Authorization"] = "Bearer " + that.authorizationBearer;
-      }
-      if (that.authorizationBasic) {
-        headers["Authorization"] = "Basic " + that.authorizationBasic;
-      }
-      headers["X-InstanceNo"] = instance_no;
-
-      fetch(that._src + "/instance_get/" + name,  {
-        method: 'POST',
-        mode: 'cors',
-        headers,
-        cache: 'no-cache',
-        credentials: 'same-origin',
-        body: ``
-      })
-      .then((response) => {
-        if (response.headers.has("X-PropertyType")) {
-          switch (response.headers.get("X-PropertyType")) {
-            case "function":
-              resolve ((...params) => {
-                var headers = {
-                  'Content-Type': 'application/json'
-                };
-                if (that.authorizationBearer) {
-                  headers["Authorization"] = "Bearer " + that.authorizationBearer;
-                }
-                if (that.authorizationBasic) {
-                  headers["Authorization"] = "Basic " + that.authorizationBasic;
-                }
-                return new Promise((resolve3, reject3) => {
-                  fetch(that._src + "/instance_call/" + name,  {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers,
-                    cache: 'no-cache',
-                    credentials: 'same-origin',
-                    body: JSON.stringify(params)
-                  })
-                  .then((response) => {
-                    if (!response.ok) {
-                      if (response.headers.has("X-Exception")) {
-                        throw response.headers.get("X-Exception");
-                      } else {
-                        throw 'Network response was not ok';
-                      }
-                    }
-                    resolve3(response.json());
-                  })
-                  .catch((e) => {
-                    reject3(e);
-                  });
-                });
-              });
-            case "json":
-              resolve (response.json());
-          }
-        } else if (response.headers.has("X-Exception")) {
-          throw response.headers.get("X-Exception");
-        } else {
-          throw 'Network response was not ok';
-        }
-      });
-    });
-
-  }
-
-  setInstanceProperty(that, instance_no, name, value) {
-    return new Promise((resolve, reject) => {
-      var headers = {
-        'Content-Type': 'application/json'
-      };
-      if (that.authorizationBearer) {
-        headers["Authorization"] = "Bearer " + that.authorizationBearer;
-      }
-      if (that.authorizationBasic) {
-        headers["Authorization"] = "Basic " + that.authorizationBasic;
-      }
-      headers["X-InstanceNo"] = instance_no;
-
-      fetch(that._src + "/instance_set/" + name,  {
-        method: 'POST',
-        mode: 'cors',
-        headers,
-        cache: 'no-cache',
-        credentials: 'same-origin',
-        body: JSON.stringify([value]),
-      })
-      .then((response) => {
-        if (!response.ok) {
-          if (response.headers.has("X-Exception")) {
-            throw response.headers.get("X-Exception");
-          } else {
-            throw 'Network response was not ok';
-          }
-        }
-        resolve(response.json());
-      });
-    });
-
-  }
-
-  jsonInstanceProperty(that, instance_no) {
-    return new Promise((resolve, reject) => {
-      var headers = {
-        'Content-Type': 'application/json'
-      };
-      if (that.authorizationBearer) {
-        headers["Authorization"] = "Bearer " + that.authorizationBearer;
-      }
-      if (that.authorizationBasic) {
-        headers["Authorization"] = "Basic " + that.authorizationBasic;
-      }
-      headers["X-InstanceNo"] = instance_no;
-
-      fetch(that._src + "/instance_json/",  {
-        method: 'POST',
-        mode: 'cors',
-        headers,
-        cache: 'no-cache',
-        credentials: 'same-origin',
-        body: '',
-      })
-      .then((response) => {
-        if (!response.ok) {
-          if (response.headers.has("X-Exception")) {
-            throw response.headers.get("X-Exception");
-          } else {
-            throw 'Network response was not ok';
-          }
-        }
-        resolve(response.json());
-      });
-    });
-
-  }
-
-  fetchInstanceMethod(that, instance_no, name) {
-    return (...params) => {
-      var headers = {
-        'Content-Type': 'application/json'
-      };
-      if (that.authorizationBearer) {
-        headers["Authorization"] = "Bearer " + that.authorizationBearer;
-      }
-      if (that.authorizationBasic) {
-        headers["Authorization"] = "Basic " + that.authorizationBasic;
-      }
-      headers["X-InstanceNo"] = instance_no;
-
-      return new Promise((resolve3, reject3) => {
-        fetch(that._src + "/instance_call/" + name,  {
-          method: 'POST',
-          mode: 'cors',
-          headers,
-          cache: 'no-cache',
-          credentials: 'same-origin',
-          body: JSON.stringify(params)
-        })
-        .then((response) => {
-          if (!response.ok) {
-            if (response.headers.has("X-Exception")) {
-              throw response.headers.get("X-Exception");
-            } else {
-              throw 'Network response was not ok';
-            }
-          }
-          resolve3(response.json());
-        })
-        .catch((e) => {
-          reject3(e);
-        });
-      });
-    };
-  }
-
-  get instantiate () {
-    var that = this;
-    if (!this._instanciate) {
-      this._instanciate = new Proxy({}, {
-        get(target, name, receiver) {
-          if (!Reflect.has(target, name)) {
-            Reflect.set(target, name, (...params) => {
-
-            var headers = {
-              'Content-Type': 'application/json'
-            };
-            if (that.authorizationBearer) {
-              headers["Authorization"] = "Bearer " + that.authorizationBearer;
-            }
-            if (that.authorizationBasic) {
-              headers["Authorization"] = "Basic " + that.authorizationBasic;
-            }
-            return new Promise((resolve, reject) => {
-              fetch(that._src + "/instance_construct/" + name, {
-                method: 'POST',
-                mode: 'cors',
-                headers,
-                cache: 'no-cache',
-                credentials: 'same-origin',
-                body: JSON.stringify(params),
-              })
-              .then((response) => {
-                if (response.headers.has("X-InstanceNo")) {
-                  let __instance_no = response.headers.get("X-InstanceNo");
-                  var eventHandlers = {};
-                  var instance = {
-                    call : new Proxy({}, {
-                      get(target, name2, receiver) {
-                        return that.fetchInstanceMethod(that, __instance_no, name2);
-                      },
-                    }),
-                    get : new Proxy({}, {
-                      get(target, name2, receiver) {
-                        return that.fetchInstanceProperty(that, __instance_no, name2);
-                      },
-                    }),
-                    set : new Proxy({}, {
-                      get(target, name2, receiver) {
-                        return (value) => { that.setInstanceProperty(that, __instance_no, name2, value); };
-                      },
-                    }),
-                    json : () => {
-                      return that.jsonInstanceProperty(that, __instance_no);
-                    },
-                    addEventHandler : (event, handler) => {
-                      if (!eventHandlers[event]) {
-                        eventHandlers[event] = [];
-                      }
-                      eventHandlers[event].push(handler);
-                    },
-                    removeEventHandler : (event, handler) => {
-                      if (eventHandlers[event]) {
-                        var index = eventHandlers[event].indexOf(handler);
-                        if (index >= 0) {
-                          eventHandlers[event].splice(index, 1);
-                        }
-                      }
-                    },
-                  };
-                  that.instanceObjects[__instance_no] = instance;
-                  Object.defineProperty(instance, "__callEventHandlers", {
-                    enumerable: false,
-                    writable: false,
-                    value: (event, detail) => {
-                      if (eventHandlers[event]) {
-                        for(var h of eventHandlers[event]) {
-                          try {
-                            h({type : event, detail});
-                          } catch (e) {
-                          }
-                        }
-                      }
-                    } 
-                  });
-                  resolve(instance);
-                } else if (response.headers.has("X-Exception")) {
-                  throw response.headers.get("X-Exception");
-                } else {
-                  throw 'Network response was not ok';
-                }
-              })
-              .catch((e) => {
-                reject(e);
-              });
-            });
-
-            }, receiver);
-          }
-          return Reflect.get(target, name, receiver);
-        },
-      });
-    }
-    return this._instanciate;
-  }
   set src(src) {
     this._src = src;
+    this.opencount = 0;
     this.updateEventConnection();
   }
 
@@ -352,6 +83,8 @@ class CcApi extends HTMLElement {
       this.eventSource.close();
     }
 
+    var oldAuthorizationBearer = this.authorizationBearer;
+
     var url = this._src + "/sse/connection";
     if (this.authorizationBearer) {
       url += "?bearer=" + this.authorizationBearer;
@@ -359,10 +92,14 @@ class CcApi extends HTMLElement {
 
     this.eventSource = new EventSource(url);
     this.eventSource.onopen = (event) => {
+      this.opencount++;
       this.registerFunctions();
     };
 
     this.eventSource.onerror = (event) => {
+      if (this.opencount == 0 && oldAuthorizationBearer == this.authorizationBearer) {
+        return;
+      }
       setTimeout(() => {
         this.updateEventConnection();
       }, 1000);
@@ -380,7 +117,6 @@ class CcApi extends HTMLElement {
         this.callbacks[x.fnname].apply (null, x.params);
       }
     };
-
     this.restartcheck();
   }
 
@@ -435,7 +171,10 @@ class CcApi extends HTMLElement {
 
   disconnectedCallback() {
     if (this.eventSource) {
-      this.eventSource.close();
+      try {
+        this.eventSource.close();
+      } catch (e) {
+      }
     }
   }
 }
