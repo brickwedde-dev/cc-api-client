@@ -29,7 +29,7 @@ class CcSimpleAuthUserList extends HTMLElement {
               p.then((action) => {
                 if (action == "ok") {
                   userEditor.save();
-                  app.core1Api.plugins.auth.addUser(userEditor.user)
+                  this.authApi.addUser(userEditor.user)
                   .then(() => {
                     this.reloadUsers();
                   });
@@ -75,7 +75,7 @@ class CcSimpleAuthUserList extends HTMLElement {
               p.then((action) => {
                 if (action == "ok") {
                   userEditor.save();
-                  app.core1Api.plugins.auth.updateUser(userEditor.user)
+                  this.authApi.updateUser(userEditor.user)
                   .then(() => {
                     this.reloadUsers();
                   });
@@ -91,7 +91,7 @@ class CcSimpleAuthUserList extends HTMLElement {
               var p = new CcMdcDialog().setHtml(`Benutzer '${row.username}' wirklich löschen?`).setOkCancel("Ok", "Abbruch").open();
               p.then((action) => {
                 if (action == "ok") {
-                  app.core1Api.plugins.auth.deleteUser(this.users[uiRowIndex - 1]._id)
+                  this.authApi.deleteUser(this.users[uiRowIndex - 1]._id)
                   .then(() => {
                     this.reloadUsers();
                   });
@@ -106,7 +106,7 @@ class CcSimpleAuthUserList extends HTMLElement {
               var p = new CcMdcDialog().setHtml(`Passwort des Benutzers '${row.username}' wirklich zurücksetzen?`).setOkCancel("Ja", "Nein").open();
               p.then((action) => {
                 if (action == "ok") {
-                  app.core1Api.plugins.auth.resetUserPassword(row)
+                  this.authApi.resetUserPassword(row)
                   .then(() => {
                     new CcMdcDialog().setHtml("Rücksetzen erfolgreich.").open();
                   })
@@ -170,7 +170,7 @@ class CcSimpleAuthUserList extends HTMLElement {
   }
 
   reloadUsers() {
-    app.core1Api.plugins.auth.listUsers()
+    this.authApi.listUsers()
     .then ((users) => {
       users.sort((a,b) => {
         var x = a.username.toLocaleLowerCase().localeCompare(b.username.toLocaleLowerCase());
