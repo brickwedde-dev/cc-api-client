@@ -112,9 +112,9 @@ class CcTranslationList extends HTMLElement {
     this.bigtable.headerDef = {
       cols : [
         new CcBigTableDataCol(false, true, 80),
-        new CcBigTableDataCol(false, false, 200),
-        new CcBigTableDataCol(false, false, 200),
-        new CcBigTableDataCol(false, false, 200),
+        new CcBigTableDataCol(false, false, 400),
+        new CcBigTableDataCol(false, false, 400),
+        new CcBigTableDataCol(false, false, 400),
       ],
     };
     
