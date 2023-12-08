@@ -1,3 +1,7 @@
+let CcSimpleAuthUserEditor__Features = [
+  { name : "Admin", value : "admin", icon : "face" }
+];
+
 class CcSimpleAuthUserEditor extends HTMLElement {
   constructor(user) {
     super();
@@ -30,7 +34,9 @@ class CcSimpleAuthUserEditor extends HTMLElement {
       this.fields[i].value = this.user[i];
     }
 
-    this.fields["features"].addItem("Admin", "admin", "face");
+    for(var f of CcSimpleAuthUserEditor__Features) {
+      this.fields["features"].addItem(f.name, f.value, f.icon);
+    }
   }
 
   save() {
