@@ -13,9 +13,9 @@ class CcTranslationEditor extends HTMLElement {
     
     this.innerHTML =`
       <table>
-        <tr><td><cc-mdc-text-field id="_id" type="text" style="margin:10px;" label="ID"></cc-mdc-text-field></td></tr>
-        <tr><td><cc-mdc-text-field id="de" type="text" style="margin:10px;" label="DE"></cc-mdc-text-field></td></tr>
-        <tr><td><cc-mdc-text-field id="nl" type="text" style="margin:10px;" label="NL"></cc-mdc-text-field></td></tr>
+        <tr><td><cc-mdc-text-field id="_id" type="text" style="margin:10px;width:90vw;" label="ID"></cc-mdc-text-field></td></tr>
+        <tr><td><cc-mdc-textarea id="de" type="text" style="margin:10px;display:inline-block;width:90vw;height:40vh;" label="DE"></cc-mdc-textarea></td></tr>
+        <tr><td><cc-mdc-textarea id="nl" type="text" style="margin:10px;display:inline-block;width:90vw;height:40vh;" label="NL"></cc-mdc-textarea></td></tr>
       </table>`;
 
     this.fields = {"_id":null, "de":null, "nl": null,};
