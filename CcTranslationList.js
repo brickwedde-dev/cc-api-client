@@ -6,10 +6,16 @@ class CcTranslationList extends HTMLElement {
   connectedCallback() {
     this.innerHTML =`
       <cc-mdc-text-field id="filtertext" type="text" label="${t9n`Filter`}" style="position: absolute;top:10px;left:10px;width:300px;"></cc-mdc-text-field>
-      <cc-big-table style="position: absolute;top:50px;left:0px;width:100%;height:100%;"></cc-big-table>
+      <cc-big-table style="position: absolute;top:75px;left:0px;width:100%;height:100%;"></cc-big-table>
     `;
 
     this.filtertext = this.querySelector("#filtertext");
+    this.filtertext.addEventListener("change", () => {
+      this.updateTable();
+    })
+    this.filtertext.addEventListener("input", () => {
+      this.updateTable();
+    })
 
     this.bigtable = this.querySelector("cc-big-table");
 
