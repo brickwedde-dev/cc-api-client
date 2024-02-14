@@ -143,7 +143,7 @@ class CcTranslationList extends HTMLElement {
   updateTable() {
     this.bigtable.data = [];
     this.bigtable.data.push (new CcBigTableDataRow(false, true, 30));
-    var filtertext = this.filtertext.value.toLocaleLowerCase();
+    var filtertext = this.filtertext ? this.filtertext.value.toLocaleLowerCase() : "";
     for (var i = 0; i < this.translations.length; i++) {
       if (filtertext) {
         var found = false;
