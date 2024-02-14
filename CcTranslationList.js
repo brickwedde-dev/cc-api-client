@@ -154,7 +154,7 @@ class CcTranslationList extends HTMLElement {
       if (filtertext) {
         var found = false;
         for(var key in this.translations[i]) {
-          if (this.translations[i][key] && this.translations[i][key].indexOf(filtertext) >= 0) {
+          if (this.translations[i][key] && this.translations[i][key].toLocaleLowerCase().indexOf(filtertext) >= 0) {
             found = true;
             break;
           }
