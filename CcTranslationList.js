@@ -4,7 +4,12 @@ class CcTranslationList extends HTMLElement {
   }
 
   connectedCallback() {
-    this.innerHTML =`<cc-big-table style="position: absolute;top:0px;left:0px;width:100%;height:100%;"></cc-big-table>`;
+    this.innerHTML =`
+      <cc-mdc-text-field id="filtertext" type="text" label="${t9n`Filter`}" style="position: absolute;top:10px;left:10px;width:300px;"></cc-big-table>
+      <cc-big-table style="position: absolute;top:50px;left:0px;width:100%;height:100%;"></cc-big-table>
+    `;
+
+    this.filtertext = this.querySelector("#filtertext");
 
     this.bigtable = this.querySelector("cc-big-table");
 
@@ -138,7 +143,20 @@ class CcTranslationList extends HTMLElement {
   updateTable() {
     this.bigtable.data = [];
     this.bigtable.data.push (new CcBigTableDataRow(false, true, 30));
+    var filtertext = this.filtertext.value.toLocaleLowerCase();
     for (var i = 0; i < this.translations.length; i++) {
+      if (filtertext) {
+        var found = false;
+        for(var key in this.translations[i]) {
+          if (this.translations[i][key] && this.translations[i][key].indexOf(filtertext) >= 0) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          continue
+        }
+      }
       this.bigtable.data.push (new CcBigTableDataRow(false, false, 30, this.translations[i]));
     }
     this.bigtable.fillRows ();
