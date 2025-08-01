@@ -62,6 +62,37 @@ class CcApi extends HTMLElement {
     });
   }
 
+  postBlobToMethod(name, blob) {
+    var headers = {
+      'Content-Type': 'application/octet-stream'
+    };
+    if (this.authorizationBearer) {
+      headers["Authorization"] = "Bearer " + this.authorizationBearer;
+    }
+    if (this.authorizationBasic) {
+      headers["Authorization"] = "Basic " + this.authorizationBasic;
+    }
+    return fetch(this._src + "/method/" + name,  {
+      method: 'POST',
+      mode: 'cors',
+      headers,
+      cache: 'no-cache',
+      credentials: 'same-origin',
+      body: blob
+    })
+    .then((response) => {
+      if (!response.ok) {
+        if (response.headers.has("X-Exception")) {
+          throw response.headers.get("X-Exception").escapeXml();
+        } else {
+          throw 'Network response was not ok';
+        }
+      }
+      return response.json();
+    });
+
+  }
+
   fetchInstanceProperty(that, instance_no, name) {
     return new Promise((resolve, reject) => {
       var headers = {
